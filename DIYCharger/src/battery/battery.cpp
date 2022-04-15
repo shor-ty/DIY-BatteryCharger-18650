@@ -115,20 +115,6 @@ void Battery::setMode(const enum mode m)
 }
 
 
-// * * * * * * * * * * * Public Return Functions * * * * * * * * * * * * * * //
-
-unsigned int Battery::nDischarges() const
-{
-    return nDischarges_;
-}
-
-
-enum Battery::mode Battery::mode() const
-{
-    return mode_;
-}
-
-
 // * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * * * //
 
 bool Battery::checkIfReplacedOrEmpty()

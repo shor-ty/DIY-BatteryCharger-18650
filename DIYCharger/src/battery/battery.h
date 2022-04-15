@@ -163,10 +163,10 @@ public:
         inline float tCharge() const { return tCharge_; }
 
         // Return the number of discharges
-        unsigned int nDischarges() const;
+        inline unsigned int nDischarges () const { return nDischarges_; }
 
         // Return the mode
-        enum mode mode() const;
+        inline enum mode mode() const { return mode_; };
 
 
     // Public Member Functions
