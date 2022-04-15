@@ -360,7 +360,7 @@ float Battery::DtoA
   const int highD,
   const float lowA,
   const float highA
-)
+) const 
 {
   // Steps in digital way
   const unsigned int digStep = highD - lowD;

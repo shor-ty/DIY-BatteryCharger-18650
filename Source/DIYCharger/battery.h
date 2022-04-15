@@ -187,7 +187,7 @@ private:
       const int,
       const float,
       const float
-    );
+  ) const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
