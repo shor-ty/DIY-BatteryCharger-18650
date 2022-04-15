@@ -74,7 +74,7 @@ Battery::~Battery()
 
 //* * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * *//
 
-const bool Battery::checkIfReplacedOrEmpty()
+bool Battery::checkIfReplacedOrEmpty() const
 {
   // Get actual voltage
   const float U = readU();
@@ -153,7 +153,7 @@ void Battery::incrementDischarges()
 }
 
 
-const unsigned int Battery::nDischarges() const
+unsigned int Battery::nDischarges() const
 {
   return nDischarges_;
 }
@@ -178,7 +178,7 @@ void Battery::setMode(const enum mode m)
 }
 
 
-const enum Battery::mode Battery::mode() const
+enum Battery::mode Battery::mode() const
 {
   return mode_;
 }
@@ -246,7 +246,7 @@ void Battery::update()
 }
 
 
-const bool Battery::charging()
+bool Battery::charging() const
 {
   // Increment time
   tCharge_ += (millis() - tOffset_)/ 1000.;
@@ -303,7 +303,7 @@ const bool Battery::charging()
 }
 
 
-const bool Battery::discharging()
+bool Battery::discharging() const
 {
   // If the current voltage is lower than 2.5V we stop discharging
   if (U_ < 2.60)
@@ -331,7 +331,7 @@ void Battery::checkIfFullyTested()
 }
 
 
-const float Battery::readU()
+float Battery::readU() const
 {
     // Make 20 measeurements and create the mean value
     int Udigital = 0;
