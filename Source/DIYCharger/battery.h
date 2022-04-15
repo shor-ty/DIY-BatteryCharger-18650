@@ -123,7 +123,7 @@ public:
     inline int id() const { return id_; };
 
     // Check if battery was replaced or empty
-    bool checkIfReplacedOrEmpty() const;
+    bool checkIfReplacedOrEmpty();
 
     // Set new offset
     void setOffset(const unsigned long);

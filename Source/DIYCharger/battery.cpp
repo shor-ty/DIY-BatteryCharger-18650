@@ -74,7 +74,7 @@ Battery::~Battery()
 
 //* * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * *//
 
-bool Battery::checkIfReplacedOrEmpty() const
+bool Battery::checkIfReplacedOrEmpty() 
 {
   // Get actual voltage
   const float U = readU();
