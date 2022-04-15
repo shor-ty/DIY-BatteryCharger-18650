@@ -120,10 +120,10 @@ public:
 
     
     // Return battery id
-    inline const int id() { return id_; };
+    inline int id() const { return id_; };
 
     // Check if battery was replaced or empty
-    const bool checkIfReplacedOrEmpty();
+    bool checkIfReplacedOrEmpty();
 
     // Set new offset
     void setOffset(const unsigned long);
@@ -141,19 +141,19 @@ public:
     void incrementDischarges();
 
     // Return the number of discharges
-    const unsigned int nDischarges() const;
+    unsigned int nDischarges() const;
 
     // Set the mode
     void setMode(const mode m);
 
     // Return the mode
-    const enum mode mode() const;
+    enum mode mode() const;
 
     // Return the voltage (V)
-    inline const float U() { return U_; }
+    inline float U() const { return U_; }
 
     // Return the time needed for charging
-    inline const float tCharge() const { return tCharge_; }
+    inline float tCharge() const { return tCharge_; }
     
     // Reset all data to zero
     void reset();
@@ -163,10 +163,10 @@ public:
     void update();
 
     // Function that determines if we are still charging or not
-    const bool charging();
+    bool charging();
 
     // Function that determines if we are still discharging or not
-    const bool discharging();
+    bool discharging();
 
     // Function that determines if the battery is fully tested
     void checkIfFullyTested();
@@ -175,7 +175,7 @@ public:
 private:
 
     // Read the digital signal at A0, convert it to a voltage and return it
-    const float readU();
+    float readU() const;
 
     // Convert the digital to an analog value
     // This function provides a mapping from an digital value to an analog value
@@ -187,7 +187,7 @@ private:
       const int,
       const float,
       const float
-    );
+  ) const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

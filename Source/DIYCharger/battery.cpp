@@ -74,7 +74,7 @@ Battery::~Battery()
 
 //* * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * *//
 
-const bool Battery::checkIfReplacedOrEmpty()
+bool Battery::checkIfReplacedOrEmpty() 
 {
   // Get actual voltage
   const float U = readU();
@@ -153,7 +153,7 @@ void Battery::incrementDischarges()
 }
 
 
-const unsigned int Battery::nDischarges() const
+unsigned int Battery::nDischarges() const
 {
   return nDischarges_;
 }
@@ -178,7 +178,7 @@ void Battery::setMode(const enum mode m)
 }
 
 
-const enum Battery::mode Battery::mode() const
+enum Battery::mode Battery::mode() const
 {
   return mode_;
 }
@@ -200,7 +200,7 @@ void Battery::reset()
   ICharge_ = 0;
 
   // Set all points to 0
-  for (int i = 0; i < sizeof(UBat_)/sizeof(float); ++i)
+  for (size_t i = 0; i < sizeof(UBat_)/sizeof(float); ++i)
   {
     UBat_[i] = 0;
   }
@@ -246,7 +246,7 @@ void Battery::update()
 }
 
 
-const bool Battery::charging()
+bool Battery::charging()
 {
   // Increment time
   tCharge_ += (millis() - tOffset_)/ 1000.;
@@ -280,7 +280,6 @@ const bool Battery::charging()
   }
 
   // Check if all values are identical by an error of 1e-5 to the actual value
-  bool identical = false;
   float tmp = 0;
 
   for (const auto value : UBat_)
@@ -303,7 +302,7 @@ const bool Battery::charging()
 }
 
 
-const bool Battery::discharging()
+bool Battery::discharging()
 {
   // If the current voltage is lower than 2.5V we stop discharging
   if (U_ < 2.60)
@@ -331,7 +330,7 @@ void Battery::checkIfFullyTested()
 }
 
 
-const float Battery::readU()
+float Battery::readU() const
 {
     // Make 20 measeurements and create the mean value
     int Udigital = 0;
@@ -361,7 +360,7 @@ float Battery::DtoA
   const int highD,
   const float lowA,
   const float highA
-)
+) const 
 {
   // Steps in digital way
   const unsigned int digStep = highD - lowD;
