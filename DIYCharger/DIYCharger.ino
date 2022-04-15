@@ -22,7 +22,7 @@
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "battery.h"
+#include "src/battery/battery.h"
 
 // * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * * * //
 

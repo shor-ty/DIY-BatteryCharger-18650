@@ -13,8 +13,8 @@
 #ifndef battery_h
 #define battery_h
 
-#include "Arduino.h"
-#include "Streaming.h"
+#include <Arduino.h>
+#include <Streaming.h>
 
 /*****************************************************************************/
 
