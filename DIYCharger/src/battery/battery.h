@@ -60,9 +60,6 @@ private:
         // Oversampling
         int overSampling_;
 
-        // The amount of already performed discharging cycles
-        unsigned int nCycles_;
-
         // Number of total discharge cycles to be perfomed
         unsigned int nTotalDischarges_{2};
 
