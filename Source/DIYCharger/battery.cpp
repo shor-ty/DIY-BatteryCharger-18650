@@ -280,7 +280,6 @@ bool Battery::charging()
   }
 
   // Check if all values are identical by an error of 1e-5 to the actual value
-  bool identical = false;
   float tmp = 0;
 
   for (const auto value : UBat_)
