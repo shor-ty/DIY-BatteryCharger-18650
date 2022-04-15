@@ -1,5 +1,5 @@
 
-# DIY Battery Charger [![Badge License]][License]
+# DIY Battery Charger [![Badge License]][License] ![Badge Board]
 
 *Combining the **Wemos D1** chip with **18650** cells*
 
@@ -13,5 +13,6 @@ mini chip and `C++` / Arduino code.
 <!----------------------------------------------------------------------------->
 
 [Badge License]: https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge
+[Badge Board]: https://img.shields.io/badge/Board-Wemos_D1-2345be?style=for-the-badge
 
 [License]: LICENSE
