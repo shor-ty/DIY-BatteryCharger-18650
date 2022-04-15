@@ -246,7 +246,7 @@ void Battery::update()
 }
 
 
-bool Battery::charging() const
+bool Battery::charging()
 {
   // Increment time
   tCharge_ += (millis() - tOffset_)/ 1000.;
@@ -303,7 +303,7 @@ bool Battery::charging() const
 }
 
 
-bool Battery::discharging() const
+bool Battery::discharging()
 {
   // If the current voltage is lower than 2.5V we stop discharging
   if (U_ < 2.60)

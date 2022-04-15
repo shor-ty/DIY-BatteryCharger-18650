@@ -163,10 +163,10 @@ public:
     void update();
 
     // Function that determines if we are still charging or not
-    bool charging() const;
+    bool charging();
 
     // Function that determines if we are still discharging or not
-    bool discharging() const;
+    bool discharging();
 
     // Function that determines if the battery is fully tested
     void checkIfFullyTested();
