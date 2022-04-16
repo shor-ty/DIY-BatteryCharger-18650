@@ -27,6 +27,7 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
+#include <LittleFS.h>
 #include "src/battery/battery.h"
 
 // * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * * * //
@@ -43,6 +44,12 @@ void setup()
   Serial.begin(9600);
   pinMode(D1, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
+
+    if (!LittleFS.begin())
+    {
+        Serial.println("Error mounting the file system");
+        return;
+    }
 }
 
 

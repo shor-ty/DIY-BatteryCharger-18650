@@ -28,6 +28,7 @@ SourceFiles
 
 #include <Arduino.h>
 #include <Streaming.h>
+#include "../filesystem/filesystem.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,6 +38,8 @@ SourceFiles
 \*---------------------------------------------------------------------------*/
 
 class Battery
+:
+    public FileSystem
 {
 public:
 
@@ -51,7 +54,9 @@ private:
         // Status of program (charge / discharge or no battery inserted)
         mode mode_;
 
-        // Battery id
+        // The index (not changable up to now - its a unique cell id that is
+        // increased per finished test, or if the temperature of the cell
+        // exceeds the given limit
         int id_;
 
         // Channel for SLI
@@ -170,6 +175,10 @@ public:
 
 
     // Public Member Functions
+
+        // Open the cell-index file, return the included number, increment
+        // the number and save the new number into the file
+        unsigned int readCellId();
 
         // Check if battery was replaced or empty
         bool checkIfReplacedOrEmpty();

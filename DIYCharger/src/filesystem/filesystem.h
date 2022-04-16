@@ -22,8 +22,7 @@ SourceFiles
 #ifndef filesystem_h
 #define filesystem_h
 
-#include <Arduino.h>
-#include <Streaming.h>
+#include <FS.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -34,6 +33,11 @@ SourceFiles
 
 class FileSystem
 {
+    // Private class data
+
+
+        // File name that holds the measurement data
+        String fileName_;
 
 public:
 
@@ -42,6 +46,27 @@ public:
 
     // Destroctor
     ~FileSystem();
+
+
+    // Public Setter Functions
+
+
+    // Public Return Functions
+
+
+    // Public Member Functions
+
+
+private:
+
+    // Private Member Functions
+
+
+        // Read the file and return the content
+
+
+        // Write the given content into the file
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

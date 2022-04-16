@@ -117,6 +117,13 @@ void Battery::setMode(const enum mode m)
 
 // * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * * * //
 
+unsigned int Battery::readCellId()
+{
+    //    id_ = readCellIndex();
+    return 1;
+}
+
+
 bool Battery::checkIfReplacedOrEmpty()
 {
     // Get actual voltage
