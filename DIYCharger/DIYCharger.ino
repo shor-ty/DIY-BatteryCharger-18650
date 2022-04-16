@@ -27,22 +27,65 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
+#include <LittleFS.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 #include "src/battery/battery.h"
 
 // * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * * * //
 
 #define slots 1
+
+// Temperature sensor input and battery temperature ranges
+
+    // Minimum cell temperature (dC)
+    float TMIN{5};
+
+    // Maximum cell temperature (dC)
+    float TMAX{28};
+
+    // On which digital input is the data bus of the DS18B20 connected
+    #define TBUS D2
+
+    // All DS18B20 sensor addresses related to the single slots
+    // We are working with addresses here to have full control
+    // You can simply get the sensor addresses by connecting one sensor to
+    // your Arduino board and use the DS18x20 example sketch. You will see the
+    // address of the sensor in this form:
+    // >>> "28 FF 64 2 C9 DF 3B 42"
+    // Simply add the 0x to the single values to get
+    // >>> "0x28 0xFF 0x66 0x2 0xC9 0xDF 0x3B 0x42"
+    const byte TSensorAddresses [slots][8] =
+        {
+            {0x28,0xFF,0x64,0x2,0xC9,0xDF,0x3B,0x42}    // Sensor-Address #1
+        };
+
+
 unsigned int nSampling = 20;
 float Rdiss = 5.41;
+
+
+// * * * * * * * * * * * * * * Initialization  * * * * * * * * * * * * * * * //
+
+OneWire TBus(TBUS);
+DallasTemperature TSensors(&TBus);
 
 
 // * * * * * * * * * * * * * * Start Function  * * * * * * * * * * * * * * * //
 
 void setup()
 {
-  Serial.begin(9600);
-  pinMode(D1, OUTPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
+    Serial.begin(9600);
+    pinMode(D1, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
+
+    if (!LittleFS.begin())
+    {
+        Serial.println("Error mounting the file system");
+        return;
+    }
+
+    TSensors.begin();
 }
 
 
@@ -58,8 +101,25 @@ void loop()
 
     for (int id = 0; id < slots; id++)
     {
-        Serial << " **** Create the battery object **** " << endl;
-        batteries[id] = new Battery(id, millis(), 3.3);
+        Serial.println(" ++ Generate battery slot #" + String(id));
+        batteries[id] =
+            new Battery
+            (
+                id,             // Battery slot
+                millis(),       // Offset for calculation
+                3.3,            // Resistance for discharging
+                TMIN,           // Minimum cell temperature
+                TMAX,           // Maximum cell temperature
+                TSensors        // Object of the DallasTemperature class
+            );
+
+        Serial.println(" ++ Set the bit-wise address");
+        // Set bit-wise the address of the temperature sensor
+        // I am not able to do it in the constructor via reference nor pointer
+        for (unsigned int i = 0; i < 8; ++i)
+        {
+            batteries[id]->setTSensorAddress(i, TSensorAddresses[id][i]);
+        }
     }
 
     bool show = true;
@@ -70,9 +130,21 @@ void loop()
         // Loop through all batteries
         for (auto& battery : batteries)
         {
-            // First check if the battery is tested already, if not proceed, otherwise
-            // we will do the analysis of the battery
-            if (battery->mode() != Battery::TESTED)
+            // Check if battery is not too hot
+            if (!battery->temperatureRangeOkay())
+            {
+                battery->setMode(Battery::FAILED);
+            }
+
+            Serial.println("Temperature = " + String(battery->T()));
+
+            // First check if the battery is already tested or did fail
+            // we are finished. Otherwise we will do the analysis of the battery
+            if
+            (
+                (battery->mode() != Battery::TESTED)
+             && (battery->mode() != Battery::FAILED)
+            )
             {
                 if (battery->mode() != Battery::DISCHARGE && show == true)
                 {

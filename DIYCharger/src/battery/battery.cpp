@@ -15,30 +15,15 @@ License
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-Battery::Battery()
-:
-    mode_(Battery::EMPTY),
-    id_(-1),
-    channel_(-1),
-    overSampling_(-1),
-    tOld_(0),
-    t_(0),
-    tOffset_(0),
-    nDischarges_(0),
-    R_(0),
-    U_(0),
-    I_(0),
-    P_(0),
-    C_(0),
-    e_(0),
-    tDischarge_(0),
-    tCharge_(0),
-    UCharge_(0),
-    ICharge_(0)
-{}
-
-
-Battery::Battery(const int id, const unsigned long tOffset, const float R)
+Battery::Battery
+(
+    const int id,
+    const unsigned long tOffset,
+    const float R,
+    const float TMin,
+    const float TMax,
+    DallasTemperature& sensors
+)
 :
     mode_(Battery::EMPTY),
     id_(id),
@@ -57,7 +42,12 @@ Battery::Battery(const int id, const unsigned long tOffset, const float R)
     tDischarge_(0),
     tCharge_(0),
     UCharge_(0),
-    ICharge_(0)
+    ICharge_(0),
+    T_(0),
+    TMin_(TMin),
+    TMax_(TMax),
+    TSensorAddress_{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
+    sensors_(sensors)
 {
     reset();
 }
@@ -112,6 +102,12 @@ void Battery::setMode(const enum mode m)
     {
         digitalWrite(D1, HIGH);
     }
+}
+
+
+void Battery::setTSensorAddress(const unsigned int i, const byte b)
+{
+    TSensorAddress_[i] = b;
 }
 
 
@@ -318,6 +314,32 @@ void Battery::checkIfFullyTested()
 }
 
 
+bool Battery::temperatureRangeOkay()
+{
+    Serial.println(" ++ Check temperature range");
+    // FIrst make an temperature update
+    T_ = readT();
+
+    Serial.println(" ++ T = " + String(T_));
+
+    // Handle error codes
+    if (T_ == 85 || T_ == -127)
+    {
+        return false;
+    }
+
+    // User defined bounds
+    if (T_ < TMin_ || T_ > TMax_)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
 // * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
 
 float Battery::readU() const
@@ -360,6 +382,20 @@ float Battery::DtoA
     const float DtoA = widthA / digStep;
 
     return (DtoA * digital);
+}
+
+
+float Battery::readT() const
+{
+    Serial.println(" ++ Request data by address");
+    // Update the data
+    sensors_.requestTemperaturesByAddress(TSensorAddress_);
+
+    // Take the data
+    Serial.println(" ++ Get temperature-data");
+    float tmp = sensors_.getTempC(TSensorAddress_);
+
+    return tmp;
 }
 
 

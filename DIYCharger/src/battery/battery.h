@@ -28,6 +28,7 @@ SourceFiles
 
 #include <Arduino.h>
 #include <Streaming.h>
+#include <DallasTemperature.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,7 +42,7 @@ class Battery
 public:
 
     // The modes to distiguish between different states
-    enum mode { CHARGE, DISCHARGE, EMPTY, FIRST, TESTED};
+    enum mode { CHARGE, DISCHARGE, EMPTY, FIRST, TESTED, FAILED };
 
 
 private:
@@ -115,18 +116,36 @@ private:
         float UBat_[20];
 
 
+    // Temperature sensor data
+
+        // Actual temperature (dC)
+        float T_;
+
+        // Min-Temperature of cell (dC)
+        const float TMin_;
+
+        // Max-Temperature of cell (dC)
+        const float TMax_;
+
+        // Temperature sensor address (DS18B20)
+        byte TSensorAddress_[8];
+
+        // Reference to the sensors object
+        DallasTemperature& sensors_;
+
+
 public:
 
-
-    // Constructor
-    Battery();
 
     // Constructor for setting up the circuit
     Battery
     (
         const int,
         const unsigned long,
-        const float
+        const float,
+        const float,
+        const float,
+        DallasTemperature&
     );
 
     // Destroctor
@@ -150,6 +169,10 @@ public:
         // Set the mode
         void setMode(const mode m);
 
+        // Set bitwise the address of the temperature sensor
+        // I am too stupid to do it in the constructor -.-
+        void setTSensorAddress(const unsigned int, const byte);
+
 
     // Public Return Functions
 
@@ -159,6 +182,9 @@ public:
         // Return the voltage (V)
         inline float U() const { return U_; }
 
+        // Return the temperature (dC)
+        inline float T() const { return T_; }
+
         // Return the time needed for charging
         inline float tCharge() const { return tCharge_; }
 
@@ -167,6 +193,8 @@ public:
 
         // Return the mode
         inline enum mode mode() const { return mode_; };
+
+        //inline const byte* sensorAddress() { return TSensorAddress_; }
 
 
     // Public Member Functions
@@ -193,6 +221,9 @@ public:
         // Function that determines if the battery is fully tested
         void checkIfFullyTested();
 
+        // Function that determines if the battery temperature is okay
+        bool temperatureRangeOkay();
+
 
 private:
 
@@ -212,6 +243,10 @@ private:
             const float,
             const float
         ) const;
+
+        // Read the actual temperature of the sensor at D2 and return the value
+        // in [dC]
+        float readT() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
