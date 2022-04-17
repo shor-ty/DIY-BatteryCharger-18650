@@ -28,7 +28,7 @@ SourceFiles
 
 #include <Arduino.h>
 #include <Streaming.h>
-#include "../filesystem/filesystem.h"
+#include "../writerReader/writerReader.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,7 +39,7 @@ SourceFiles
 
 class Battery
 :
-    public FileSystem
+    public WriterReader
 {
 public:
 

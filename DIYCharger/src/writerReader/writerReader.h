@@ -19,33 +19,32 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef filesystem_h
-#define filesystem_h
+#ifndef writerReader_h
+#define writerReader_h
 
-#include <LittleFS.h>
+#include "../filesystem/filesystem.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 /*---------------------------------------------------------------------------*\
-                           Class FileSystem Declaration
+                           Class WriterReader Declaration
 \*---------------------------------------------------------------------------*/
 
-class FileSystem
+class WriterReader
+:
+    public FileSystem
 {
     // Private class data
 
 
-        // File name that holds the measurement data
-        String fileName_;
-
 public:
 
     // Constructor
-    FileSystem();
+    WriterReader();
 
     // Destroctor
-    ~FileSystem();
+    ~WriterReader();
 
 
     // Public Setter Functions
@@ -53,38 +52,21 @@ public:
 
     // Public Return Functions
 
+        // Return the current battery id of the file batteryID
+        // Note: This file stores simply an integer that is increased
+        // per new battery analysis if it was TESTED or FAILED
+        // The number cannot be changed or decremented by default. However
+        // a simple push button on any digital input can handle such behavior
+        int actualCellID();
+
 
     // Public Member Functions
 
-        // Start the LittleFS system
-        bool startFS() const;
-
-        // Stop the LittleFS system
-        void stopFS() const;
-
-        // Check if file exist
-        bool fileExist(const String) const;
-
-        // Creat an empty file
-        bool createFile(const String) const;
-
-        // Write data into a file
-        bool writeData(const String, const String) const;
-
-        // Read first line of file
-        bool readFirstLine(const String, String&) const;
-
-        // Open the file for reading (default) or writing
-        File openFile(const String, const String = "r");
 
 private:
 
     // Private Member Functions
 
-        // Read the actualCellID file and return the integer
-
-
-        // Write the given content into the file
 
 };
 
