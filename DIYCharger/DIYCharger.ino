@@ -153,6 +153,7 @@ void loop()
             if (!battery->temperatureRangeOkay())
             {
                 battery->setMode(Battery::FAILED);
+                battery->writeTemperatureData();
             }
 
             Serial.println("Temperature = " + String(battery->T()));

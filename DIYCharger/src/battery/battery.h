@@ -232,6 +232,9 @@ public:
         // Correct the average data (divide by the number of cycles)
         void correctAverageData();
 
+        // Function that determines if the battery temperature is okay
+        bool temperatureRangeOkay();
+
 
     // Public IO Member Functions
 
@@ -255,8 +258,8 @@ public:
         // file
         void updateFileName() const;
 
-        // Function that determines if the battery temperature is okay
-        bool temperatureRangeOkay();
+        // Write the temperature data to the file (if limits exceeded)
+        void writeTemperatureData() const;
 
 
 private:

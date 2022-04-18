@@ -70,6 +70,9 @@ public:
             const float
         ) const;
 
+        // Write the temperature data (FAILED) to the end of the file
+        void writeTemperatureData (const String, const float) const;
+
         // Write a 80 character line based on '-' signs
         void insertHorizontalLineToFile (const String) const;
 

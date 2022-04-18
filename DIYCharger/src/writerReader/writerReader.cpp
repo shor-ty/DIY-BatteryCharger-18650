@@ -115,6 +115,34 @@ void WriterReader::writeData
 }
 
 
+void WriterReader::writeTemperatureData
+(
+    const String fileName,
+    const float T
+) const
+{
+    // Start file system
+    if (startFS())
+    {
+        if (fileExist(fileName))
+        {
+
+            // Create data string
+            const String data = "FAILED: Temperature = " + String(T, 2) + "\n";
+
+            // Write the data
+            FileSystem::writeData(fileName, data, "a");
+        }
+
+        stopFS();
+    }
+    else
+    {
+        Serial << "ERROR: Could not start LittleFS File System" << endl;
+    }
+}
+
+
 void WriterReader::insertHorizontalLineToFile(const String fileName) const
 {
     // Start file system

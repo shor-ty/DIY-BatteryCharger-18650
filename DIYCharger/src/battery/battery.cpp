@@ -396,6 +396,12 @@ void Battery::updateFileName() const
 }
 
 
+void Battery::writeTemperatureData() const
+{
+    WriterReader::writeTemperatureData(fileName_, T_);
+}
+
+
 // * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
 
 float Battery::readU() const
