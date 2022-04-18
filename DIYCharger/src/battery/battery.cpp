@@ -31,10 +31,9 @@ Battery::Battery()
     P_(0),
     C_(0),
     e_(0),
-    tDischarge_(0),
-    tCharge_(0),
     UCharge_(0),
-    ICharge_(0)
+    ICharge_(0),
+    fileName_("")
 {}
 
 
@@ -54,10 +53,9 @@ Battery::Battery(const int id, const unsigned long tOffset, const float R)
     P_(0),
     C_(0),
     e_(0),
-    tDischarge_(0),
-    tCharge_(0),
     UCharge_(0),
-    ICharge_(0)
+    ICharge_(0),
+    fileName_("slot_" + String(id))
 {
     reset();
 }
@@ -75,6 +73,8 @@ Battery::~Battery()
 void Battery::setOffset(const unsigned long tOffset)
 {
     tOffset_ = tOffset;
+    t_ = tOffset;
+    tOld_ = tOffset;
 }
 
 
@@ -116,13 +116,6 @@ void Battery::setMode(const enum mode m)
 
 
 // * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * * * //
-
-unsigned int Battery::readCellId()
-{
-    //    id_ = readCellIndex();
-    return 1;
-}
-
 
 bool Battery::checkIfReplacedOrEmpty()
 {
@@ -183,14 +176,12 @@ void Battery::reset()
 {
     tOld_ = 0;
     t_ = 0;
-    tOffset_ = 0;
+    tOffset_ = t_;
     U_ = 0;
     I_ = 0;
     P_ = 0;
     C_ = 0;
     e_ = 0;
-    tDischarge_ = 0;
-    tCharge_ = 0;
     UCharge_ = 0;
     ICharge_ = 0;
 
@@ -209,43 +200,49 @@ void Battery::update()
     // + discharging
     setU();
 
-    // The rest is only used for discharging
-    if (mode() == Battery::DISCHARGE)
-    {
-        // Calculate the current (mA)
-        I_ = U_/R_ * 1000.;
+    // Calculate the current (mA)
+    I_ = U_/R_ * 1000.;
 
-        // Calculate the current dissipation (mW)
-        P_ = U_ * I_;
+    // Calculate the current dissipation (mW)
+    P_ = U_ * I_;
 
-        // Update the time
-        tOld_ = t_;
-        t_ = millis() - tOffset_;
-        const float dt = t_ - tOld_;
-        tDischarge_ += dt / 1000.;
+    // Update the time (ms)
+    tOld_ = t_;
+    t_ = millis() - tOffset_;
+    const float dt = t_ - tOld_;
 
-        // Calcualte the capacity (mAh)
-        C_ += I_ * dt / 1000. / 3600.;
+    // Calcualte the capacity (mAh)
+    C_ += I_ * dt / 1000. / 3600.;
 
-        // Calculate the energy (mWh)
-        e_ += P_ * dt / 1000. / 3600.;
+    // Calculate the energy (mWh)
+    e_ += P_ * dt / 1000. / 3600.;
 
-        Serial
-          << "   ++ t = " << _FLOAT(tDischarge_, 2) << " (s)  "
-          << "   ++ U = " << _FLOAT(U_, 5) << " (V)  "
-          << "   ++ I = " << _FLOAT(I_, 5) << " (mA)  "
-          << "   ++ P = " << _FLOAT(P_, 2) << " (mW)  "
-          << "   ++ C = " << _FLOAT(C_, 2) << " (mAh)  "
-          << "   ++ e = " << _FLOAT(e_, 2) << " (mWh)" << endl;
-    }
+    // Write data to file
+    writeData
+    (
+        fileName_,
+        (t_/float(1000)),
+        U_,
+        I_,
+        P_,
+        C_,
+        e_
+    );
+
+    /*
+    Serial
+      << "   ++ t = " << _FLOAT(t, 2) << " (s)  "
+      << "   ++ U = " << _FLOAT(U_, 5) << " (V)  "
+      << "   ++ I = " << _FLOAT(I_, 5) << " (mA)  "
+      << "   ++ P = " << _FLOAT(P_, 2) << " (mW)  "
+      << "   ++ C = " << _FLOAT(C_, 2) << " (mAh)  "
+      << "   ++ e = " << _FLOAT(e_, 2) << " (mWh)" << endl;
+    */
 }
 
 
 bool Battery::charging()
 {
-    // Increment time
-    tCharge_ += (millis() - tOffset_)/ 1000.;
-
     // If current voltage is lower than 4.05V we are not fully charged
     // The charging modules charge up to 4.05V
     if (U_ < 4.1)
@@ -287,6 +284,9 @@ bool Battery::charging()
     // Charging finished
     if (abs(U_ - tmp) < 1e-5)
     {
+        // Add horizontal line to file
+        WriterReader::insertHorizontalLineToFile(fileName_);
+
         return false;
     }
     // Still charging
@@ -302,6 +302,9 @@ bool Battery::discharging()
     // If the current voltage is lower than 2.5V we stop discharging
     if (U_ < 2.60)
     {
+        // Add horizontal line to file
+        WriterReader::insertHorizontalLineToFile(fileName_);
+
         return false;
     }
     // Still discharging
@@ -312,16 +315,46 @@ bool Battery::discharging()
 }
 
 
-void Battery::checkIfFullyTested()
+bool Battery::checkIfFullyTested() const
 {
     if (nDischarges_ == nTotalDischarges_)
     {
-        setMode(Battery::TESTED);
+        return true;
     }
     else
     {
-        setMode(Battery::DISCHARGE);
+        return false;
     }
+}
+
+
+// * * * * * * * * * * * Public IO Member Functions  * * * * * * * * * * * * //
+
+void Battery::removeDataFile() const
+{
+    WriterReader::removeDataFile(fileName_);
+}
+
+
+void Battery::showDataFileContent() const
+{
+    WriterReader::showDataFileContent(fileName_);
+}
+
+
+void Battery::addFinalDataToFile() const
+{
+    WriterReader::addFinalDataToFile
+    (
+        fileName_,
+        readU()
+    );
+}
+
+
+void Battery::updateFileName() const
+{
+    WriterReader::updateFileName(fileName_);
 }
 
 

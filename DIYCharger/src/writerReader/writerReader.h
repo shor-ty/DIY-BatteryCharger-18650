@@ -52,22 +52,53 @@ public:
 
     // Public Return Functions
 
-        // Return the current battery id of the file batteryID
-        // Note: This file stores simply an integer that is increased
-        // per new battery analysis if it was TESTED or FAILED
-        // The number cannot be changed or decremented by default. However
-        // a simple push button on any digital input can handle such behavior
-        int actualCellID();
 
 
     // Public Member Functions
+
+        // Write the di/charging data to the slot name (the name will be
+        // changed at the end of the test to fit the correct battery ID)
+        void writeData
+        (
+            const String,
+            const float,
+            const float,
+            const float,
+            const float,
+            const float,
+            const float
+        ) const;
+
+        // Write a 80 character line based on '-' signs
+        void insertHorizontalLineToFile (const String) const;
+
+        // Remove the specified file from the system
+        void removeDataFile(const String) const;
+
+        // Show the content of the data file
+        void showDataFileContent(const String) const;
+
+        // Add final file content such as summaries
+        void addFinalDataToFile
+        (
+            const String,
+            const float
+        ) const;
+
+        // Update the file name to 'battery_<ID>' and update the cellID file
+        void updateFileName(const String) const;
 
 
 private:
 
     // Private Member Functions
 
-
+        // Return the current battery id of the file batteryID
+        // Note: This file stores simply an integer that is increased
+        // per new battery analysis if it was TESTED or FAILED
+        // The number cannot be changed or decremented by default. However
+        // a simple push button on any digital input can handle such behavior
+        int actualCellID() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

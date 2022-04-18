@@ -11,6 +11,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include <Streaming.h>
 #include "filesystem.h"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * ///
@@ -29,14 +30,10 @@ bool FileSystem::startFS() const
 {
     if (!LittleFS.begin())
     {
-        // TODO set some info as LED
-        Serial.println("Error mounting the file system");
-
         return false;
     }
     else
     {
-        Serial.println("Mounting the file system");
         return true;
     }
 }
@@ -44,8 +41,6 @@ bool FileSystem::startFS() const
 
 void FileSystem::stopFS() const
 {
-    Serial.println("Unmount the file system");
-
     LittleFS.end();
 }
 
@@ -72,13 +67,26 @@ bool FileSystem::createFile(const String fileName) const
 }
 
 
-bool FileSystem::writeData(const String fileName, const String data) const
+bool FileSystem::writeData
+(
+    const String fileName,
+    const String data,
+    const String mode,
+    const int pos
+) const
 {
-    File f = LittleFS.open(fileName.c_str(), "w");
+    File f = LittleFS.open(fileName.c_str(), mode.c_str());
 
     if (!f)
     {
         return false;
+    }
+
+    // If pos is set, move to that position first
+    if (pos != -1)
+    {
+        Serial<< "move to pos: " << String(pos) << endl;
+        f.seek(pos);
     }
 
     f.print(data);
@@ -106,11 +114,25 @@ bool FileSystem::readFirstLine(const String fileName, String& firstLine) const
 }
 
 
-File FileSystem::openFile(const String fileName, const String mode)
+File FileSystem::openFile(const String fileName, const String mode) const
 {
     File tmp = LittleFS.open(fileName.c_str(), mode.c_str());
 
     return tmp;
+}
+
+
+bool FileSystem::deleteFile(const String fileName) const
+{
+    return LittleFS.remove(fileName.c_str());
+}
+
+
+void FileSystem::rename(const String nameOld, const String nameNew) const
+{
+    startFS();
+    LittleFS.rename(nameOld, nameNew);
+    stopFS();
 }
 
 

@@ -66,13 +66,13 @@ private:
         int overSampling_;
 
         // Number of total discharge cycles to be perfomed
-        unsigned int nTotalDischarges_{2};
+        unsigned int nTotalDischarges_{1};
 
         // Old time stamp (ms)
-        unsigned int tOld_;
+        unsigned long tOld_;
 
         // Current time stamp (ms)
-        unsigned int t_;
+        unsigned long t_;
 
         // Offset of time (ms)
         unsigned long tOffset_;
@@ -101,14 +101,8 @@ private:
         // Total battery energy (mWh)
         float e_;
 
-        // Discharging time (s)
-        float tDischarge_;
-
 
     // Variables for charging analysis
-
-        // charging time (s)
-        float tCharge_;
 
         // Charging voltage (V)
         float UCharge_;
@@ -117,8 +111,13 @@ private:
         float ICharge_;
 
         // Container that stores the last n voltage data
-        float UBat_[20];
+        float UBat_[2];
 
+
+    // Variables for IO operations
+
+        // File name
+        String fileName_;
 
 public:
 
@@ -158,27 +157,23 @@ public:
 
     // Public Return Functions
 
+        // Return the offset time (ms)
+        inline unsigned int offset() const { return tOffset_; }
+
         // Return battery id
         inline int id() const { return id_; };
 
         // Return the voltage (V)
         inline float U() const { return U_; }
 
-        // Return the time needed for charging
-        inline float tCharge() const { return tCharge_; }
-
         // Return the number of discharges
-        inline unsigned int nDischarges () const { return nDischarges_; }
+        inline unsigned long nDischarges () const { return nDischarges_; }
 
         // Return the mode
         inline enum mode mode() const { return mode_; };
 
 
     // Public Member Functions
-
-        // Open the cell-index file, return the included number, increment
-        // the number and save the new number into the file
-        unsigned int readCellId();
 
         // Check if battery was replaced or empty
         bool checkIfReplacedOrEmpty();
@@ -200,7 +195,30 @@ public:
         bool discharging();
 
         // Function that determines if the battery is fully tested
-        void checkIfFullyTested();
+        bool checkIfFullyTested() const;
+
+
+    // Public IO Member Functions
+
+        // Function that removed the battery file from previous analysis, if
+        // something went wrong (clearing for startup)
+        void removeDataFile() const;
+
+        // Show the data file content
+        void showDataFileContent() const;
+
+        // Add the final data to the file such as
+        // ++ amount of discharges
+        // ++ average values
+        // ++ current (from last load) voltage (after battery is switched off
+        //    from the power supply - used for the 30-days discharging)
+        // ++ Current time-stamp (if available)
+        void addFinalDataToFile() const;
+
+        // Update the file name of the measurement data (set the correct name)
+        // from 'slot_1' to e.g., 'battery_<ID>'. Furthermore, update the id
+        // file
+        void updateFileName() const;
 
 
 private:

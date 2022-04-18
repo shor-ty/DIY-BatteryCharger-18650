@@ -27,7 +27,6 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#include <LittleFS.h>
 #include "src/battery/battery.h"
 
 // * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * * * //
@@ -44,12 +43,6 @@ void setup()
   Serial.begin(9600);
   pinMode(D1, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-
-    if (!LittleFS.begin())
-    {
-        Serial.println("Error mounting the file system");
-        return;
-    }
 }
 
 
@@ -68,8 +61,8 @@ void loop()
         Serial << " **** Create the battery object **** " << endl;
         batteries[id] = new Battery(id, millis(), 3.3);
     }
-
-    bool show = true;
+    
+    bool finished = false;
 
     // Own loop in order to not destroy the object
     do
@@ -81,25 +74,6 @@ void loop()
             // we will do the analysis of the battery
             if (battery->mode() != Battery::TESTED)
             {
-                if (battery->mode() != Battery::DISCHARGE && show == true)
-                {
-                    Serial << " ++ Voltage is       : " << _FLOAT(battery->U(),6) << "\n";
-                    Serial << "    Battery slot mode: ";
-
-                    if (battery->mode() == Battery::EMPTY) Serial << "EMPTY\n";
-                    else if (battery->mode() == Battery::CHARGE) Serial << "CHARGE\n";
-                    else if (battery->mode() == Battery::DISCHARGE) Serial << "DISCHARGE\n";
-                    else if (battery->mode() == Battery::FIRST) Serial << "FIRST\n";
-                    Serial << "    Digital Pin D1   : " << digitalRead(D1) << "\n";
-                    Serial << "    Number of dischar: " << battery->nDischarges() << "\n";
-                    Serial << ">>>>>>>" << endl;
-                    show = false;
-                }
-                else
-                {
-                    delay(2000);
-                }
-
                 // Check if new battery was inserted
                 if(battery->checkIfReplacedOrEmpty())
                 {
@@ -109,6 +83,7 @@ void loop()
                         battery->setOffset(millis());
                         battery->setU();
                         battery->setMode(Battery::CHARGE);
+                        battery->removeDataFile();
                     }
                 }
 
@@ -127,7 +102,14 @@ void loop()
                         if(!battery->charging())
                         {
                             battery->setOffset(millis());
-                            battery->checkIfFullyTested();
+                            if(battery->checkIfFullyTested())
+                            {
+                                battery->setMode(Battery::TESTED);
+                            }
+                            else
+                            {
+                                battery->setMode(Battery::DISCHARGE);
+                            }
                         }
                     }
 
@@ -139,14 +121,24 @@ void loop()
                             battery->setMode(Battery::CHARGE);
                             battery->reset();
                             battery->setOffset(millis());
-                            show = true;
                         }
                     }
                 }
             }
             else
             {
-                Serial<< "Finished ...";
+                if (!finished)
+                {
+                       Serial<< "Finished ...";
+                    finished = true;
+
+                    // Add further information to the file, rename it, update
+                    // the cellID file and sent it to the server
+                    battery->addFinalDataToFile();
+                    battery->updateFileName();
+                    //battery->sentDataToServer();
+                    battery->showDataFileContent();
+                }
                 delay(60000);
             }
         }
@@ -155,7 +147,7 @@ void loop()
         digitalWrite(LED_BUILTIN, LOW);
         delay(1);
         digitalWrite(LED_BUILTIN, HIGH);
-        delay(2000);
+        delay(1000);
     }
     while (true);
 

@@ -69,13 +69,26 @@ public:
         bool createFile(const String) const;
 
         // Write data into a file
-        bool writeData(const String, const String) const;
+        bool writeData
+        (
+            const String,
+            const String,
+            const String mode = "w",
+            const int pos = -1
+        ) const;
 
         // Read first line of file
         bool readFirstLine(const String, String&) const;
 
         // Open the file for reading (default) or writing
-        File openFile(const String, const String = "r");
+        File openFile(const String, const String = "r") const;
+
+        // Remove the specified file from the flash
+        bool deleteFile(const String) const;
+
+        // Rename the file
+        void rename(const String, const String) const;
+
 
 private:
 
