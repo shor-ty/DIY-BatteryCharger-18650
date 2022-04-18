@@ -69,8 +69,8 @@ Battery::~Battery()
 void Battery::setOffset(const unsigned long tOffset)
 {
     tOffset_ = tOffset;
-    t_ = tOffset;
-    tOld_ = tOffset;
+    t_ = 0;
+    tOld_ = 0;
 }
 
 
