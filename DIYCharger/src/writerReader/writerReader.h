@@ -10,12 +10,12 @@ License
     under the terms of the GNU General Public License version 3
 
 Description
-    This class is used for all manipulations done in the filesystem (SPIF)
-    It handles the correct data manipulation and all IOs which are needed
-    for the battery discharge and charging process
+    This class is used to write and read the data needed in the battery class
+    It takes the FileSystem class as base for the IO operations but manipulates
+    the data first for the correct handling, structur and formatation
 
 SourceFiles
-    filesystem.cpp
+    writeReader.cpp
 
 \*---------------------------------------------------------------------------*/
 
