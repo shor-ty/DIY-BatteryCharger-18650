@@ -332,11 +332,8 @@ bool Battery::checkIfFullyTested() const
 
 bool Battery::temperatureRangeOkay()
 {
-    Serial.println(" ++ Check temperature range");
     // FIrst make an temperature update
     T_ = readT();
-
-    Serial.println(" ++ T = " + String(T_));
 
     // Handle error codes
     if (T_ == 85 || T_ == -127)
@@ -449,12 +446,10 @@ float Battery::DtoA
 
 float Battery::readT() const
 {
-    Serial.println(" ++ Request data by address");
     // Update the data
     sensors_.requestTemperaturesByAddress(TSensorAddress_);
 
     // Take the data
-    Serial.println(" ++ Get temperature-data");
     float tmp = sensors_.getTempC(TSensorAddress_);
 
     return tmp;

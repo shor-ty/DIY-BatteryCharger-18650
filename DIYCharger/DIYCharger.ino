@@ -152,11 +152,9 @@ void loop()
             // Check if battery is not too hot
             if (!battery->temperatureRangeOkay())
             {
-                battery->setMode(Battery::FAILED);
-                battery->writeTemperatureData();
+                //battery->setMode(Battery::FAILED);
+                //battery->writeTemperatureData();
             }
-
-            Serial.println("Temperature = " + String(battery->T()));
 
             // First check if the battery is already tested or did fail
             // we are finished. Otherwise we will do the analysis of the battery
