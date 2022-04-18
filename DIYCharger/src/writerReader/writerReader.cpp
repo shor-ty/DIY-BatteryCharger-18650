@@ -29,6 +29,7 @@ WriterReader::~WriterReader()
 void WriterReader::writeData
 (
     const String fileName,
+    const float tTotal,
     const float t,
     const float U,
     const float I,
@@ -72,9 +73,14 @@ void WriterReader::writeData
                 }
 
                 header += "\n";
-
-                header +=
-                    "# t (s)\tU (V)\tI (mA)\tP (mW)\tC (mAh)\te (mWh)\t T (dC)\n#";
+                header += "# tTot\t";
+                header += "t (s)\t";
+                header += "U (V)\t";
+                header += "I (mA)\t";
+                header += "P (mW)\t";
+                header += "C (mAh)\t";
+                header += "e (mWh)\t";
+                header += "T (dC)\n#";
 
                 for (unsigned int i = 0; i < 80; ++i)
                 {
@@ -95,7 +101,8 @@ void WriterReader::writeData
 
         // Create data string
         const String data =
-            String(t, 2) + "\t"
+            String(tTotal, 2) + "\t"
+          + String(t, 2) + "\t"
           + String(U, 4) + "\t"
           + String(I, 4) + "\t"
           + String(P, 2) + "\t"

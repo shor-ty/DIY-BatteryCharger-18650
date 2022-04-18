@@ -50,7 +50,7 @@ Author
 
 // Set how many discharging cycles should be performed. For a more reliable
 // analysis, you can do more than one cycle
-#define NCYCLES 1
+#define NCYCLES 3
 
 
 // Temperature sensor input and battery temperature ranges
@@ -191,7 +191,9 @@ void loop()
                     {
                         if(!battery->charging())
                         {
+                            battery->writeLastData();
                             battery->setOffset(millis());
+
                             if(battery->checkIfFullyTested())
                             {
                                 battery->setMode(Battery::TESTED);
@@ -209,6 +211,7 @@ void loop()
                         if(!battery->discharging())
                         {
                             battery->incrementDischarges();
+                            battery->writeLastData();
                             battery->setMode(Battery::CHARGE);
                             battery->reset();
                             battery->setOffset(millis());

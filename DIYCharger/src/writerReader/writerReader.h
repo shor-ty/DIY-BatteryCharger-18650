@@ -67,6 +67,7 @@ public:
             const float,
             const float,
             const float,
+            const float,
             const float
         ) const;
 

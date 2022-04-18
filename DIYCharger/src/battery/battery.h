@@ -70,11 +70,14 @@ private:
         // How many discharge cyclics were already performed
         unsigned int nDischarges_;
 
-        // Old time stamp (ms)
+        // Old time stamp of charge/discharge step (ms)
         unsigned long tOld_;
 
-        // Current time stamp (ms)
+        // Current time stamp of charge/discharge step (ms)
         unsigned long t_;
+
+        // Initial offset during starting the test procedure (ms)
+        unsigned long tOffsetInitial_;
 
         // Offset of time (ms)
         unsigned long tOffset_;
@@ -217,8 +220,8 @@ public:
         void reset();
 
         // Update all data which are needed based on the mode() of
-        // the battery (charging/discharging)
-        void update();
+        // the battery (charging/discharging) and save the data to the file
+        void update(const bool forceWriting = false);
 
         // Function that determines if we are still charging
         bool charging();
@@ -260,6 +263,9 @@ public:
 
         // Write the temperature data to the file (if limits exceeded)
         void writeTemperatureData() const;
+
+        // Write the last data (force to write in the update() function)
+        void writeLastData();
 
 
 private:

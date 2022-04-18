@@ -35,6 +35,7 @@ Battery::Battery
     nDischarges_(0),
     tOld_(0),
     t_(0),
+    tOffsetInitial_(tOffset),
     tOffset_(tOffset),
     R_(R),
     U_(0),
@@ -195,7 +196,7 @@ void Battery::reset()
 }
 
 
-void Battery::update()
+void Battery::update(const bool forceWriting)
 {
     // Update the actual voltage - we do it for both modes
     // + charging
@@ -224,11 +225,15 @@ void Battery::update()
     e_ += P_ * dt / 1000. / 3600.;
 
     // Write data to file
-    if (tPassed_ > writeInterval_)
+    if (tPassed_ > writeInterval_ || forceWriting)
     {
+        // Total Time passed from the beginning of the analysis
+        const unsigned long tTotal = (millis() - tOffsetInitial_)/float(1000);
+
         writeData
         (
             fileName_,
+            tTotal,
             (t_/float(1000)),
             U_,
             I_,
@@ -396,6 +401,12 @@ void Battery::updateFileName() const
 void Battery::writeTemperatureData() const
 {
     WriterReader::writeTemperatureData(fileName_, T_);
+}
+
+
+void Battery::writeLastData()
+{
+    update(true);
 }
 
 
