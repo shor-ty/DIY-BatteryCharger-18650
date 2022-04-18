@@ -68,11 +68,11 @@ void loop()
     // Create the battery objects
     Battery* batteries[slots];
 
-    for (int id = 0; id < slots; id++)
+    for (int slot = 0; slot < slots; slot++)
     {
         Serial << " **** Create the battery object **** " << endl;
-        batteries[id] = 
-            new Battery(id, NCYCLES, millis(), WRITEINTERVAL, 3.3);
+        batteries[slot] = 
+            new Battery(slot, NCYCLES, millis(), WRITEINTERVAL, 3.3);
     }
     
     bool finished = false;

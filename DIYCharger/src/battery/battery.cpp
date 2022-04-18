@@ -17,7 +17,7 @@ License
 
 Battery::Battery
 (
-    const int id,
+    const int slot,
     const int nDischargeCycles,
     const unsigned long tOffset,
     const unsigned long writeInterval,
@@ -25,7 +25,7 @@ Battery::Battery
 )
 :
     mode_(Battery::EMPTY),
-    id_(id),
+    slot_(slot),
     channel_(-1),
     overSampling_(20),
     nTotalDischarges_(nDischargeCycles),
@@ -39,7 +39,7 @@ Battery::Battery
     P_(0),
     C_(0),
     e_(0),
-    fileName_("slot_" + String(id)),
+    fileName_("slot_" + String(slot)),
     writeInterval_(writeInterval),
     tPassed_(0)
 {

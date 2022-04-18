@@ -54,10 +54,8 @@ private:
         // Status of program (charge / discharge or no battery inserted)
         mode mode_;
 
-        // The index (not changable up to now - its a unique cell id that is
-        // increased per finished test, or if the temperature of the cell
-        // exceeds the given limit
-        int id_;
+        // The battery slot number
+        int slot_;
 
         // Channel for SLI
         int channel_;
@@ -163,8 +161,8 @@ public:
         // Return the offset time (ms)
         inline unsigned int offset() const { return tOffset_; }
 
-        // Return battery id
-        inline int id() const { return id_; };
+        // Return battery slot
+        inline int slot() const { return slot_; };
 
         // Return the voltage (V)
         inline float U() const { return U_; }
