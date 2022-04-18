@@ -208,7 +208,6 @@ void WriterReader::addFinalDataToFile
     {
         if (fileExist(fileName))
         {
-            fileLastModificationTime(fileName);
             // Create the string to be added
             // First line will be updated in ::updateFileName with the
             // correct battery id, hence we need to keep it free

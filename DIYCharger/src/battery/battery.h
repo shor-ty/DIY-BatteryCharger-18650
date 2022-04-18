@@ -126,10 +126,6 @@ private:
 
 public:
 
-
-    // Constructor
-    Battery();
-
     // Constructor for setting up the circuit
     Battery
     (

@@ -15,28 +15,6 @@ License
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-Battery::Battery()
-:
-    mode_(Battery::EMPTY),
-    id_(-1),
-    channel_(-1),
-    overSampling_(-1),
-    tOld_(0),
-    t_(0),
-    tOffset_(0),
-    nDischarges_(0),
-    R_(0),
-    U_(0),
-    I_(0),
-    P_(0),
-    C_(0),
-    e_(0),
-    fileName_(""),
-    writeInterval_(0),
-    tPassed_(0)
-{}
-
-
 Battery::Battery
 (
     const int id,
@@ -68,10 +46,7 @@ Battery::Battery
 
 
 Battery::~Battery()
-{
-    Serial << " ****** Battery object destroyed ******" << endl << endl;
-    delay (2000);
-}
+{}
 
 
 // * * * * * * * * * * * Public Setter Functions * * * * * * * * * * * * * * //
@@ -150,25 +125,25 @@ bool Battery::checkIfReplacedOrEmpty()
         return false;
     }
 
-  // TODO: might be optimized
-  // Check if current U at A0 is around the last measurement
-  // point +- 50 mV, or if we are < 2.4 V its a new one
-  /*if (U < 2.4)
-  {
-      return true;
-  }
+    // TODO: might be optimized
+    // Check if current U at A0 is around the last measurement
+    // point +- 50 mV, or if we are < 2.4 V its a new one
+    /*if (U < 2.4)
+    {
+        return true;
+    }
 
-  if
-  (
-      (U > (U_ - 0.05) && U < (U_ + 0.051))
-  )
-  {
-      return false;
-  }
-  else
-  {
-      return true;
-  }*/
+    if
+    (
+        (U > (U_ - 0.05) && U < (U_ + 0.051))
+    )
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }*/
 }
 
 
@@ -245,16 +220,6 @@ void Battery::update()
 
         tPassed_ = 0;
     }
-
-    /*
-    Serial
-      << "   ++ t = " << _FLOAT(t, 2) << " (s)  "
-      << "   ++ U = " << _FLOAT(U_, 5) << " (V)  "
-      << "   ++ I = " << _FLOAT(I_, 5) << " (mA)  "
-      << "   ++ P = " << _FLOAT(P_, 2) << " (mW)  "
-      << "   ++ C = " << _FLOAT(C_, 2) << " (mAh)  "
-      << "   ++ e = " << _FLOAT(e_, 2) << " (mWh)" << endl;
-    */
 }
 
 
