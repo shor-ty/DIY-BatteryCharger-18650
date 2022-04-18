@@ -34,7 +34,8 @@ void WriterReader::writeData
     const float I,
     const float P,
     const float C,
-    const float e
+    const float e,
+    const float T
 ) const
 {
     // Start file system
@@ -72,7 +73,8 @@ void WriterReader::writeData
 
                 header += "\n";
 
-                header += "# t (s)\tU (V)\tI (mA)\tP (mW)\tC (mAh)\te (mWh)\n#";
+                header +=
+                    "# t (s)\tU (V)\tI (mA)\tP (mW)\tC (mAh)\te (mWh)\t T (dC)\n#";
 
                 for (unsigned int i = 0; i < 80; ++i)
                 {
@@ -98,15 +100,8 @@ void WriterReader::writeData
           + String(I, 4) + "\t"
           + String(P, 2) + "\t"
           + String(C, 2) + "\t"
-          + String(e, 2) + "\t\n";
-          /*
-            String(_FLOAT(t, 2)) + "\t"
-          + String(_FLOAT(U, 4) + "\t"
-          + String(_FLOAT(I, 4) + "\t"
-          + String(_FLOAT(P, 2) + "\t"
-          + String(_FLOAT(C, 2) + "\t"
-          + String(_FLOAT(e, 2) + "\t\n";
-          */
+          + String(e, 2) + "\t"
+          + String(T, 1) + "\n";
 
         // Write the data
         FileSystem::writeData(fileName, data, "a");

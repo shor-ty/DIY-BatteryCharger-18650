@@ -202,6 +202,9 @@ void Battery::update()
     // + discharging
     setU();
 
+    // Set the temperature
+    T_ = readT();
+
     // Calculate the current (mA)
     I_ = U_/R_ * 1000.;
 
@@ -231,7 +234,8 @@ void Battery::update()
             I_,
             P_,
             C_,
-            e_
+            e_,
+            T_
         );
 
         tPassed_ = 0;
