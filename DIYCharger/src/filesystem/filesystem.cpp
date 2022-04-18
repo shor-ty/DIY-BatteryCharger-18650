@@ -26,6 +26,10 @@ FileSystem::~FileSystem()
 
 // * * * * * * * * * * * * Public Return Functions * * * * * * * * * * * * * //
 
+
+
+// * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * * //
+
 bool FileSystem::startFS() const
 {
     if (!LittleFS.begin())
