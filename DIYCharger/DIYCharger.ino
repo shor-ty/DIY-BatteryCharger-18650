@@ -40,6 +40,10 @@ Author
 // of the average calculation
 #define WRITEINTERVAL 5
 
+// Set how many discharging cycles should be performed. For a more reliable
+// analysis, you can do more than one cycle
+#define NCYCLES 1
+
 unsigned int nSampling = 20;
 float Rdiss = 5.41;
 
@@ -68,7 +72,7 @@ void loop()
     {
         Serial << " **** Create the battery object **** " << endl;
         batteries[id] = 
-            new Battery(id, millis(), WRITEINTERVAL, 3.3);
+            new Battery(id, NCYCLES, millis(), WRITEINTERVAL, 3.3);
     }
     
     bool finished = false;

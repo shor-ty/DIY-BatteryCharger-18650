@@ -66,7 +66,10 @@ private:
         int overSampling_;
 
         // Number of total discharge cycles to be perfomed
-        unsigned int nTotalDischarges_{1};
+        unsigned int nTotalDischarges_;
+
+        // How many discharge cyclics were already performed
+        unsigned int nDischarges_;
 
         // Old time stamp (ms)
         unsigned long tOld_;
@@ -79,9 +82,6 @@ private:
 
 
     // Variables for capacity analysis
-
-        // Discharge cyclics
-        unsigned int nDischarges_;
 
         // Resistance used (Ohm)
         float R_;
@@ -129,6 +129,7 @@ public:
     // Constructor for setting up the circuit
     Battery
     (
+        const int,
         const int,
         const unsigned long,
         const unsigned long,

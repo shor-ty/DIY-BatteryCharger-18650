@@ -18,6 +18,7 @@ License
 Battery::Battery
 (
     const int id,
+    const int nDischargeCycles,
     const unsigned long tOffset,
     const unsigned long writeInterval,
     const float R
@@ -27,10 +28,11 @@ Battery::Battery
     id_(id),
     channel_(-1),
     overSampling_(20),
+    nTotalDischarges_(nDischargeCycles),
+    nDischarges_(0),
     tOld_(0),
     t_(0),
     tOffset_(tOffset),
-    nDischarges_(0),
     R_(R),
     U_(0),
     I_(0),
