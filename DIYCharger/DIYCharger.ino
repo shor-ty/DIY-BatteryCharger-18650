@@ -32,6 +32,14 @@ Author
 // * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * * * //
 
 #define slots 1
+
+// The timeInterval describes approximate after how many seconds a new entry
+// is added into the measurement file. Low values give higher resolution but
+// also increase the data file size. If we charge/discharge commonly within
+// 1 to 3h, a interval > 30 is sufficient. This will not influence the analysis
+// of the average calculation
+#define WRITEINTERVAL 5
+
 unsigned int nSampling = 20;
 float Rdiss = 5.41;
 
@@ -59,7 +67,8 @@ void loop()
     for (int id = 0; id < slots; id++)
     {
         Serial << " **** Create the battery object **** " << endl;
-        batteries[id] = new Battery(id, millis(), 3.3);
+        batteries[id] = 
+            new Battery(id, millis(), WRITEINTERVAL, 3.3);
     }
     
     bool finished = false;

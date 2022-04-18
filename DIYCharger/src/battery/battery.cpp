@@ -31,11 +31,19 @@ Battery::Battery()
     P_(0),
     C_(0),
     e_(0),
-    fileName_("")
+    fileName_(""),
+    writeInterval_(0),
+    tPassed_(0)
 {}
 
 
-Battery::Battery(const int id, const unsigned long tOffset, const float R)
+Battery::Battery
+(
+    const int id,
+    const unsigned long tOffset,
+    const unsigned long writeInterval,
+    const float R
+)
 :
     mode_(Battery::EMPTY),
     id_(id),
@@ -51,7 +59,9 @@ Battery::Battery(const int id, const unsigned long tOffset, const float R)
     P_(0),
     C_(0),
     e_(0),
-    fileName_("slot_" + String(id))
+    fileName_("slot_" + String(id)),
+    writeInterval_(writeInterval),
+    tPassed_(0)
 {
     reset();
 }
@@ -184,6 +194,7 @@ void Battery::reset()
     P_ = 0;
     C_ = 0;
     e_ = 0;
+    tPassed_ = 0;
 
     // Set all points to 0
     for (size_t i = 0; i < sizeof(UBat_)/sizeof(float); ++i)
@@ -210,6 +221,7 @@ void Battery::update()
     tOld_ = t_;
     t_ = millis() - tOffset_;
     const float dt = t_ - tOld_;
+    tPassed_ += dt;
 
     // Calcualte the capacity (mAh)
     C_ += I_ * dt / 1000. / 3600.;
@@ -218,16 +230,21 @@ void Battery::update()
     e_ += P_ * dt / 1000. / 3600.;
 
     // Write data to file
-    writeData
-    (
-        fileName_,
-        (t_/float(1000)),
-        U_,
-        I_,
-        P_,
-        C_,
-        e_
-    );
+    if (tPassed_ > writeInterval_)
+    {
+        writeData
+        (
+            fileName_,
+            (t_/float(1000)),
+            U_,
+            I_,
+            P_,
+            C_,
+            e_
+        );
+
+        tPassed_ = 0;
+    }
 
     /*
     Serial

@@ -117,6 +117,13 @@ private:
         // File name
         String fileName_;
 
+        // Write interval (s)
+        unsigned long writeInterval_;
+
+        // Actual time passed (s)
+        unsigned long tPassed_;
+
+
 public:
 
 
@@ -127,6 +134,7 @@ public:
     Battery
     (
         const int,
+        const unsigned long,
         const unsigned long,
         const float
     );
