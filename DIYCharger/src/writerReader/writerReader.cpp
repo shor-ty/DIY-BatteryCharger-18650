@@ -58,10 +58,19 @@ void WriterReader::writeData
 
                 // Initialize 10 lines for adding data at the end of the
                 // analysis
-                for (unsigned int i = 0; i < 10; ++i)
+                for (unsigned int i = 0; i < 8; ++i)
                 {
                     header += "#                                           \n";
                 }
+
+                header += "#";
+
+                for (unsigned int i = 0; i < 80; ++i)
+                {
+                    header += "=";
+                }
+
+                header += "\n";
 
                 header += "# t (s)\tU (V)\tI (mA)\tP (mW)\tC (mAh)\te (mWh)\n#";
 
@@ -122,7 +131,7 @@ void WriterReader::insertHorizontalLineToFile(const String fileName) const
 
             for (unsigned int i = 0; i < 80; ++i)
             {
-                line += "=";
+                line += "-";
             }
 
             line += "\n";
@@ -206,10 +215,12 @@ void WriterReader::addFinalDataToFile
                 "#                                                     \n";
 
             info +=
+             +  "#----------------------------------------------------------\n"
              +  "# Voltage after last charging (V): " + String(U) + "\n"
-             +  "# Discharge cycles: " + String(nCycles) + "\n"
-             +  "# Average capacity: " + String(CAve) + "\n"
-             +  "# Average energy: " + String(eAve);
+             +  "# Discharge cycles      : " + String(nCycles) + "\n"
+             +  "# Average energy (mWh)  : " + String(eAve) + "\n"
+             +  "# Average capacity (mAh): " + String(CAve) + "\n"
+             +  "#----------------------------------------------------------\n";
 
             FileSystem::writeData(fileName, info, "r+");
         }
