@@ -31,8 +31,6 @@ Battery::Battery()
     P_(0),
     C_(0),
     e_(0),
-    UCharge_(0),
-    ICharge_(0),
     fileName_("")
 {}
 
@@ -53,8 +51,6 @@ Battery::Battery(const int id, const unsigned long tOffset, const float R)
     P_(0),
     C_(0),
     e_(0),
-    UCharge_(0),
-    ICharge_(0),
     fileName_("slot_" + String(id))
 {
     reset();
@@ -174,6 +170,12 @@ void Battery::incrementDischarges()
 
 void Battery::reset()
 {
+    // Before resetting, take the last values for averaging process
+    // We devide this data after we are finished by nCycles
+    CAve_ += C_;
+    eAve_ += e_;
+
+    // Reset all data
     tOld_ = 0;
     t_ = 0;
     tOffset_ = t_;
@@ -182,8 +184,6 @@ void Battery::reset()
     P_ = 0;
     C_ = 0;
     e_ = 0;
-    UCharge_ = 0;
-    ICharge_ = 0;
 
     // Set all points to 0
     for (size_t i = 0; i < sizeof(UBat_)/sizeof(float); ++i)
@@ -328,6 +328,13 @@ bool Battery::checkIfFullyTested() const
 }
 
 
+void Battery::correctAverageData()
+{
+    CAve_ /= float(nDischarges_);
+    eAve_ /= float(nDischarges_);
+}
+
+
 // * * * * * * * * * * * Public IO Member Functions  * * * * * * * * * * * * //
 
 void Battery::removeDataFile() const
@@ -347,7 +354,10 @@ void Battery::addFinalDataToFile() const
     WriterReader::addFinalDataToFile
     (
         fileName_,
-        readU()
+        nDischarges_,
+        readU(),
+        CAve_,
+        eAve_
     );
 }
 

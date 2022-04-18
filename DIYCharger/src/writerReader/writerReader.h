@@ -82,6 +82,9 @@ public:
         void addFinalDataToFile
         (
             const String,
+            const unsigned int,
+            const float,
+            const float,
             const float
         ) const;
 

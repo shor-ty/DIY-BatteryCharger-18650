@@ -101,16 +101,14 @@ private:
         // Total battery energy (mWh)
         float e_;
 
+        // Average capacity if more cycles are performed (mAh)
+        float CAve_;
 
-    // Variables for charging analysis
-
-        // Charging voltage (V)
-        float UCharge_;
-
-        // Charging current (mA)
-        float ICharge_;
+        // Average battery energy if more cycles are performed (mWh)
+        float eAve_;
 
         // Container that stores the last n voltage data
+        // DEPRECIATED: will be replaced by RShunt
         float UBat_[2];
 
 
@@ -196,6 +194,9 @@ public:
 
         // Function that determines if the battery is fully tested
         bool checkIfFullyTested() const;
+
+        // Correct the average data (divide by the number of cycles)
+        void correctAverageData();
 
 
     // Public IO Member Functions

@@ -60,7 +60,7 @@ void WriterReader::writeData
                 // analysis
                 for (unsigned int i = 0; i < 10; ++i)
                 {
-                    header += "#\n";
+                    header += "#                                           \n";
                 }
 
                 header += "# t (s)\tU (V)\tI (mA)\tP (mW)\tC (mAh)\te (mWh)\n#";
@@ -189,7 +189,10 @@ void WriterReader::showDataFileContent(const String fileName) const
 void WriterReader::addFinalDataToFile
 (
     const String fileName,
-    const float U
+    const unsigned int nCycles,
+    const float U,
+    const float CAve,
+    const float eAve
 ) const
 {
     if (startFS())
@@ -197,10 +200,18 @@ void WriterReader::addFinalDataToFile
         if (fileExist(fileName))
         {
             // Create the string to be added
-            const String info = "Entry 1\nEntry 2\nEntry 3\n";
+            // First line will be updated in ::updateFileName with the
+            // correct battery id, hence we need to keep it free
+            String info =
+                "#                                                     \n";
 
-            // TODO - Get first line, and extend the information with the
-            // info string
+            info +=
+             +  "# Voltage after last charging (V): " + String(U) + "\n"
+             +  "# Discharge cycles: " + String(nCycles) + "\n"
+             +  "# Average capacity: " + String(CAve) + "\n"
+             +  "# Average energy: " + String(eAve);
+
+            FileSystem::writeData(fileName, info, "r+");
         }
         else
         {
@@ -229,14 +240,14 @@ void WriterReader::updateFileName(const String fileName) const
         if (fileExist(fileName))
         {
             // Add the cell id into the first line
-            const String tmp = "Battery number: " + String(cellID);
+            const String tmp = "# Battery number: " + String(cellID);
             FileSystem::writeData(fileName, tmp, "r+");
         }
 
         stopFS();
     }
 
-    rename(fileName, "battery_" + String(cellID));
+    //rename(fileName, "battery_" + String(cellID));
 }
 
 

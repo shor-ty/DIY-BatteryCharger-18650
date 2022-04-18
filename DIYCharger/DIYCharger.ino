@@ -105,6 +105,7 @@ void loop()
                             if(battery->checkIfFullyTested())
                             {
                                 battery->setMode(Battery::TESTED);
+                                battery->correctAverageData();
                             }
                             else
                             {
