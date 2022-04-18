@@ -34,7 +34,24 @@ Author
 
 // * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * * * //
 
+// Define how many battery slots your project has
+// If you have more than two, you need to take care of MULTIPLEXER and correct
+// signal usage
 #define slots 1
+
+
+// The timeInterval describes approximate after how many seconds a new entry
+// is added into the measurement file. Low values give higher resolution but
+// also increase the data file size. If we charge/discharge commonly within
+// 1 to 3h, a interval > 30 is sufficient. This will not influence the analysis
+// of the average calculation
+#define WRITEINTERVAL 5
+
+
+// Set how many discharging cycles should be performed. For a more reliable
+// analysis, you can do more than one cycle
+#define NCYCLES 1
+
 
 // Temperature sensor input and battery temperature ranges
 
@@ -99,14 +116,16 @@ void loop()
     // Create the battery objects
     Battery* batteries[slots];
 
-    for (int id = 0; id < slots; id++)
+    for (int slot = 0; slot < slots; slot++)
     {
-        Serial.println(" ++ Generate battery slot #" + String(id));
-        batteries[id] =
+        Serial.println(" ++ Generate battery slot #" + String(slot));
+        batteries[slot] =
             new Battery
             (
-                id,             // Battery slot
+                slot,           // Battery slot
+                NCYCLES,        // Amount of discharge cyclces
                 millis(),       // Offset for calculation
+                WRITEINTERVAL,  // Interval when writting data into file
                 3.3,            // Resistance for discharging
                 TMIN,           // Minimum cell temperature
                 TMAX,           // Maximum cell temperature
@@ -118,11 +137,11 @@ void loop()
         // I am not able to do it in the constructor via reference nor pointer
         for (unsigned int i = 0; i < 8; ++i)
         {
-            batteries[id]->setTSensorAddress(i, TSensorAddresses[id][i]);
+            batteries[slot]->setTSensorAddress(i, TSensorAddresses[slot][i]);
         }
     }
-
-    bool show = true;
+    
+    bool finished = false;
 
     // Own loop in order to not destroy the object
     do
@@ -146,25 +165,6 @@ void loop()
              && (battery->mode() != Battery::FAILED)
             )
             {
-                if (battery->mode() != Battery::DISCHARGE && show == true)
-                {
-                    Serial << " ++ Voltage is       : " << _FLOAT(battery->U(),6) << "\n";
-                    Serial << "    Battery slot mode: ";
-
-                    if (battery->mode() == Battery::EMPTY) Serial << "EMPTY\n";
-                    else if (battery->mode() == Battery::CHARGE) Serial << "CHARGE\n";
-                    else if (battery->mode() == Battery::DISCHARGE) Serial << "DISCHARGE\n";
-                    else if (battery->mode() == Battery::FIRST) Serial << "FIRST\n";
-                    Serial << "    Digital Pin D1   : " << digitalRead(D1) << "\n";
-                    Serial << "    Number of dischar: " << battery->nDischarges() << "\n";
-                    Serial << ">>>>>>>" << endl;
-                    show = false;
-                }
-                else
-                {
-                    delay(2000);
-                }
-
                 // Check if new battery was inserted
                 if(battery->checkIfReplacedOrEmpty())
                 {
@@ -174,6 +174,7 @@ void loop()
                         battery->setOffset(millis());
                         battery->setU();
                         battery->setMode(Battery::CHARGE);
+                        battery->removeDataFile();
                     }
                 }
 
@@ -192,7 +193,15 @@ void loop()
                         if(!battery->charging())
                         {
                             battery->setOffset(millis());
-                            battery->checkIfFullyTested();
+                            if(battery->checkIfFullyTested())
+                            {
+                                battery->setMode(Battery::TESTED);
+                                battery->correctAverageData();
+                            }
+                            else
+                            {
+                                battery->setMode(Battery::DISCHARGE);
+                            }
                         }
                     }
 
@@ -204,14 +213,24 @@ void loop()
                             battery->setMode(Battery::CHARGE);
                             battery->reset();
                             battery->setOffset(millis());
-                            show = true;
                         }
                     }
                 }
             }
             else
             {
-                Serial<< "Finished ...";
+                if (!finished)
+                {
+                       Serial<< "Finished ...";
+                    finished = true;
+
+                    // Add further information to the file, rename it, update
+                    // the cellID file and sent it to the server
+                    battery->addFinalDataToFile();
+                    battery->updateFileName();
+                    //battery->sentDataToServer();
+                    battery->showDataFileContent();
+                }
                 delay(60000);
             }
         }
@@ -220,7 +239,7 @@ void loop()
         digitalWrite(LED_BUILTIN, LOW);
         delay(1);
         digitalWrite(LED_BUILTIN, HIGH);
-        delay(2000);
+        delay(1000);
     }
     while (true);
 

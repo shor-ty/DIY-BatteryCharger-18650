@@ -29,6 +29,7 @@ SourceFiles
 #include <Arduino.h>
 #include <Streaming.h>
 #include <DallasTemperature.h>
+#include "../writerReader/writerReader.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,6 +39,8 @@ SourceFiles
 \*---------------------------------------------------------------------------*/
 
 class Battery
+:
+    public WriterReader
 {
 public:
 
@@ -52,8 +55,8 @@ private:
         // Status of program (charge / discharge or no battery inserted)
         mode mode_;
 
-        // Battery id
-        int id_;
+        // The battery slot number
+        int slot_;
 
         // Channel for SLI
         int channel_;
@@ -62,22 +65,22 @@ private:
         int overSampling_;
 
         // Number of total discharge cycles to be perfomed
-        unsigned int nTotalDischarges_{2};
+        unsigned int nTotalDischarges_;
+
+        // How many discharge cyclics were already performed
+        unsigned int nDischarges_;
 
         // Old time stamp (ms)
-        unsigned int tOld_;
+        unsigned long tOld_;
 
         // Current time stamp (ms)
-        unsigned int t_;
+        unsigned long t_;
 
         // Offset of time (ms)
         unsigned long tOffset_;
 
 
     // Variables for capacity analysis
-
-        // Discharge cyclics
-        unsigned int nDischarges_;
 
         // Resistance used (Ohm)
         float R_;
@@ -97,23 +100,15 @@ private:
         // Total battery energy (mWh)
         float e_;
 
-        // Discharging time (s)
-        float tDischarge_;
+        // Average capacity if more cycles are performed (mAh)
+        float CAve_;
 
-
-    // Variables for charging analysis
-
-        // charging time (s)
-        float tCharge_;
-
-        // Charging voltage (V)
-        float UCharge_;
-
-        // Charging current (mA)
-        float ICharge_;
+        // Average battery energy if more cycles are performed (mWh)
+        float eAve_;
 
         // Container that stores the last n voltage data
-        float UBat_[20];
+        // DEPRECIATED: will be replaced by RShunt
+        float UBat_[2];
 
 
     // Temperature sensor data
@@ -134,13 +129,26 @@ private:
         DallasTemperature& sensors_;
 
 
-public:
+    // Variables for IO operations
 
+        // File name
+        String fileName_;
+
+        // Write interval (s)
+        unsigned long writeInterval_;
+
+        // Actual time passed (s)
+        unsigned long tPassed_;
+
+
+public:
 
     // Constructor for setting up the circuit
     Battery
     (
         const int,
+        const int,
+        const unsigned long,
         const unsigned long,
         const float,
         const float,
@@ -176,8 +184,11 @@ public:
 
     // Public Return Functions
 
-        // Return battery id
-        inline int id() const { return id_; };
+        // Return the offset time (ms)
+        inline unsigned int offset() const { return tOffset_; }
+
+        // Return battery slot
+        inline int slot() const { return slot_; };
 
         // Return the voltage (V)
         inline float U() const { return U_; }
@@ -185,11 +196,8 @@ public:
         // Return the temperature (dC)
         inline float T() const { return T_; }
 
-        // Return the time needed for charging
-        inline float tCharge() const { return tCharge_; }
-
         // Return the number of discharges
-        inline unsigned int nDischarges () const { return nDischarges_; }
+        inline unsigned long nDischarges () const { return nDischarges_; }
 
         // Return the mode
         inline enum mode mode() const { return mode_; };
@@ -219,7 +227,33 @@ public:
         bool discharging();
 
         // Function that determines if the battery is fully tested
-        void checkIfFullyTested();
+        bool checkIfFullyTested() const;
+
+        // Correct the average data (divide by the number of cycles)
+        void correctAverageData();
+
+
+    // Public IO Member Functions
+
+        // Function that removed the battery file from previous analysis, if
+        // something went wrong (clearing for startup)
+        void removeDataFile() const;
+
+        // Show the data file content
+        void showDataFileContent() const;
+
+        // Add the final data to the file such as
+        // ++ amount of discharges
+        // ++ average values
+        // ++ current (from last load) voltage (after battery is switched off
+        //    from the power supply - used for the 30-days discharging)
+        // ++ Current time-stamp (if available)
+        void addFinalDataToFile() const;
+
+        // Update the file name of the measurement data (set the correct name)
+        // from 'slot_1' to e.g., 'battery_<ID>'. Furthermore, update the id
+        // file
+        void updateFileName() const;
 
         // Function that determines if the battery temperature is okay
         bool temperatureRangeOkay();

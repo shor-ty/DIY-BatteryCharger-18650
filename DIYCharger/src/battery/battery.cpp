@@ -17,8 +17,10 @@ License
 
 Battery::Battery
 (
-    const int id,
+    const int slot,
+    const int nDischargeCycles,
     const unsigned long tOffset,
+    const unsigned long writeInterval,
     const float R,
     const float TMin,
     const float TMax,
@@ -26,38 +28,35 @@ Battery::Battery
 )
 :
     mode_(Battery::EMPTY),
-    id_(id),
+    slot_(slot),
     channel_(-1),
     overSampling_(20),
+    nTotalDischarges_(nDischargeCycles),
+    nDischarges_(0),
     tOld_(0),
     t_(0),
     tOffset_(tOffset),
-    nDischarges_(0),
     R_(R),
     U_(0),
     I_(0),
     P_(0),
     C_(0),
     e_(0),
-    tDischarge_(0),
-    tCharge_(0),
-    UCharge_(0),
-    ICharge_(0),
     T_(0),
     TMin_(TMin),
     TMax_(TMax),
     TSensorAddress_{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
-    sensors_(sensors)
+    sensors_(sensors),
+    fileName_("slot_" + String(slot)),
+    writeInterval_(writeInterval),
+    tPassed_(0)
 {
     reset();
 }
 
 
 Battery::~Battery()
-{
-    Serial << " ****** Battery object destroyed ******" << endl << endl;
-    delay (2000);
-}
+{}
 
 
 // * * * * * * * * * * * Public Setter Functions * * * * * * * * * * * * * * //
@@ -65,6 +64,8 @@ Battery::~Battery()
 void Battery::setOffset(const unsigned long tOffset)
 {
     tOffset_ = tOffset;
+    t_ = 0;
+    tOld_ = 0;
 }
 
 
@@ -140,25 +141,25 @@ bool Battery::checkIfReplacedOrEmpty()
         return false;
     }
 
-  // TODO: might be optimized
-  // Check if current U at A0 is around the last measurement
-  // point +- 50 mV, or if we are < 2.4 V its a new one
-  /*if (U < 2.4)
-  {
-      return true;
-  }
+    // TODO: might be optimized
+    // Check if current U at A0 is around the last measurement
+    // point +- 50 mV, or if we are < 2.4 V its a new one
+    /*if (U < 2.4)
+    {
+        return true;
+    }
 
-  if
-  (
-      (U > (U_ - 0.05) && U < (U_ + 0.051))
-  )
-  {
-      return false;
-  }
-  else
-  {
-      return true;
-  }*/
+    if
+    (
+        (U > (U_ - 0.05) && U < (U_ + 0.051))
+    )
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }*/
 }
 
 
@@ -170,18 +171,21 @@ void Battery::incrementDischarges()
 
 void Battery::reset()
 {
+    // Before resetting, take the last values for averaging process
+    // We devide this data after we are finished by nCycles
+    CAve_ += C_;
+    eAve_ += e_;
+
+    // Reset all data
     tOld_ = 0;
     t_ = 0;
-    tOffset_ = 0;
+    tOffset_ = t_;
     U_ = 0;
     I_ = 0;
     P_ = 0;
     C_ = 0;
     e_ = 0;
-    tDischarge_ = 0;
-    tCharge_ = 0;
-    UCharge_ = 0;
-    ICharge_ = 0;
+    tPassed_ = 0;
 
     // Set all points to 0
     for (size_t i = 0; i < sizeof(UBat_)/sizeof(float); ++i)
@@ -198,43 +202,45 @@ void Battery::update()
     // + discharging
     setU();
 
-    // The rest is only used for discharging
-    if (mode() == Battery::DISCHARGE)
+    // Calculate the current (mA)
+    I_ = U_/R_ * 1000.;
+
+    // Calculate the current dissipation (mW)
+    P_ = U_ * I_;
+
+    // Update the time (ms)
+    tOld_ = t_;
+    t_ = millis() - tOffset_;
+    const float dt = t_ - tOld_;
+    tPassed_ += dt;
+
+    // Calcualte the capacity (mAh)
+    C_ += I_ * dt / 1000. / 3600.;
+
+    // Calculate the energy (mWh)
+    e_ += P_ * dt / 1000. / 3600.;
+
+    // Write data to file
+    if (tPassed_ > writeInterval_)
     {
-        // Calculate the current (mA)
-        I_ = U_/R_ * 1000.;
+        writeData
+        (
+            fileName_,
+            (t_/float(1000)),
+            U_,
+            I_,
+            P_,
+            C_,
+            e_
+        );
 
-        // Calculate the current dissipation (mW)
-        P_ = U_ * I_;
-
-        // Update the time
-        tOld_ = t_;
-        t_ = millis() - tOffset_;
-        const float dt = t_ - tOld_;
-        tDischarge_ += dt / 1000.;
-
-        // Calcualte the capacity (mAh)
-        C_ += I_ * dt / 1000. / 3600.;
-
-        // Calculate the energy (mWh)
-        e_ += P_ * dt / 1000. / 3600.;
-
-        Serial
-          << "   ++ t = " << _FLOAT(tDischarge_, 2) << " (s)  "
-          << "   ++ U = " << _FLOAT(U_, 5) << " (V)  "
-          << "   ++ I = " << _FLOAT(I_, 5) << " (mA)  "
-          << "   ++ P = " << _FLOAT(P_, 2) << " (mW)  "
-          << "   ++ C = " << _FLOAT(C_, 2) << " (mAh)  "
-          << "   ++ e = " << _FLOAT(e_, 2) << " (mWh)" << endl;
+        tPassed_ = 0;
     }
 }
 
 
 bool Battery::charging()
 {
-    // Increment time
-    tCharge_ += (millis() - tOffset_)/ 1000.;
-
     // If current voltage is lower than 4.05V we are not fully charged
     // The charging modules charge up to 4.05V
     if (U_ < 4.1)
@@ -276,6 +282,9 @@ bool Battery::charging()
     // Charging finished
     if (abs(U_ - tmp) < 1e-5)
     {
+        // Add horizontal line to file
+        WriterReader::insertHorizontalLineToFile(fileName_);
+
         return false;
     }
     // Still charging
@@ -291,6 +300,9 @@ bool Battery::discharging()
     // If the current voltage is lower than 2.5V we stop discharging
     if (U_ < 2.60)
     {
+        // Add horizontal line to file
+        WriterReader::insertHorizontalLineToFile(fileName_);
+
         return false;
     }
     // Still discharging
@@ -301,15 +313,15 @@ bool Battery::discharging()
 }
 
 
-void Battery::checkIfFullyTested()
+bool Battery::checkIfFullyTested() const
 {
     if (nDischarges_ == nTotalDischarges_)
     {
-        setMode(Battery::TESTED);
+        return true;
     }
     else
     {
-        setMode(Battery::DISCHARGE);
+        return false;
     }
 }
 
@@ -337,6 +349,46 @@ bool Battery::temperatureRangeOkay()
     {
         return true;
     }
+}
+
+
+void Battery::correctAverageData()
+{
+    CAve_ /= float(nDischarges_);
+    eAve_ /= float(nDischarges_);
+}
+
+
+// * * * * * * * * * * * Public IO Member Functions  * * * * * * * * * * * * //
+
+void Battery::removeDataFile() const
+{
+    WriterReader::removeDataFile(fileName_);
+}
+
+
+void Battery::showDataFileContent() const
+{
+    WriterReader::showDataFileContent(fileName_);
+}
+
+
+void Battery::addFinalDataToFile() const
+{
+    WriterReader::addFinalDataToFile
+    (
+        fileName_,
+        nDischarges_,
+        readU(),
+        CAve_,
+        eAve_
+    );
+}
+
+
+void Battery::updateFileName() const
+{
+    WriterReader::updateFileName(fileName_);
 }
 
 
