@@ -208,6 +208,7 @@ void WriterReader::addFinalDataToFile
     {
         if (fileExist(fileName))
         {
+            fileLastModificationTime(fileName);
             // Create the string to be added
             // First line will be updated in ::updateFileName with the
             // correct battery id, hence we need to keep it free
@@ -215,8 +216,10 @@ void WriterReader::addFinalDataToFile
                 "#                                                     \n";
 
             info +=
-             +  "#----------------------------------------------------------\n"
-             +  "# Voltage after last charging (V): " + String(U) + "\n"
+                "#----------------------------------------------------------\n";
+
+            info +=
+                "# Voltage after last charging (V): " + String(U) + "\n"
              +  "# Discharge cycles      : " + String(nCycles) + "\n"
              +  "# Average energy (mWh)  : " + String(eAve) + "\n"
              +  "# Average capacity (mAh): " + String(CAve) + "\n"
