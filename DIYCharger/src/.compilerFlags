@@ -1,0 +1,49 @@
+#------------------------------------------------------------------------------
+# LIION -- MAKEFILE
+#------------------------------------------------------------------------------
+#
+# Dr. mont. Tobias Holzmann
+# October 2024
+#
+# Description
+#     Compiler flags and control board for the make compiling tool
+#
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+# Compiler and compiling mode: DEBUG | OPT
+#------------------------------------------------------------------------------
+
+COMPILER=g++
+COMPILE_MODE=DEBUG
+
+
+#------------------------------------------------------------------------------
+# Compiling flags for DEBUG 
+#------------------------------------------------------------------------------
+
+CPPFLAGS_DEBUG=-Wall -Wextra -std=c++17 -g -pedantic-errors \
+	-ggdb -Wno-unused-parameter -Wno-unused-variable -D_GLIBCXX_DEBUG
+
+
+#------------------------------------------------------------------------------
+# Compiling flags for OPT
+#------------------------------------------------------------------------------
+
+CPPFLAGS_OPT=-Wall -Wextra -std=c++17 -pedantic-errors -Wno-unused-parameter \
+	-Wno-unused-variable -O3
+
+
+#------------------------------------------------------------------------------
+
+ifeq ($(COMPILE_MODE), DEBUG)
+CPPFLAGS=$(CPPFLAGS_DEBUG)
+endif
+
+ifeq ($(COMPILE_MODE), OPT)
+CPPFLAGS=$(CPPFLAGS_OPT)
+endif
+
+
+#------------------------------------------------------------------------------
