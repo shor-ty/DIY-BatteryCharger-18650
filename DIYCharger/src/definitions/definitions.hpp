@@ -87,7 +87,7 @@ void Warning(const string, const char*, const unsigned long);
 
 void NotImplemented(const char*, const unsigned long);
 
-string Header();
+void Header();
 
 void Footer(const scalar);
 

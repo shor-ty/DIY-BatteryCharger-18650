@@ -28,68 +28,101 @@ Author
 \*---------------------------------------------------------------------------*/
 
 #include <iostream>
+#include <chrono>
 //#include <LittleFS.h>
 //#include <OneWire.h>
 //#include <DallasTemperature.h>
-//#include "src/battery/battery.h"
+#include "src/battery/battery.hpp"
 #include "src/definitions/definitions.hpp"
 
-// * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main ()
+using namespace LIION;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+int main (int argc, char** argv)
 {
     Header();
+
+    //- Control of the program (should be excluded into a control-file)
+
+        //- Amount of battery slots
+        const unsigned int nSlots = 1;
+
+        //- Time when data are written out (s)
+        const unsigned int writeInterval = 5;
+
+        //- Charge-Discharge cycles
+        const unsigned int nCycles = 1;
+
+        //- Minimum/maximum cell temperature (degC)
+        const scalar TCellMin = 5; 
+        const scalar TCellMax = 35;
+
+        // On which digital input is the data bus of the DS18B20 connected
+        //#define TBUS D2
+
+        //- Addresses of the DS18B20 sensors
+        const uint8_t TSensorAddresses [nSlots][8] =
+        {
+            {0x28,0xFF,0x64,0x2,0xC9,0xDF,0x3B,0x42}    // Sensor-Address #1
+        };
+
+        //- Number of n
+        const unsigned int nSampling = 20;
+
+        //- The value of the dissipation resistor (ohm)
+        const scalar Rdiss [nSlots] =
+        {
+           5.41
+        };
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    // Create the battery objects
+    Battery* batteries[nSlots];
+
+    for (unsigned int slot = 0; slot < nSlots; slot++)
+    {
+        Info<< " ++ Initialize battery slot #" + toStr(slot) << endl;
+
+        const auto tNow = std::chrono::system_clock::now();
+
+        const auto tMill =
+            std::chrono::duration_cast<std::chrono::milliseconds>
+            (
+                tNow.time_since_epoch()
+            ).count();
+
+        batteries[slot] =
+            new Battery
+            (
+                slot,           // Battery slot
+                nCycles,        // Amount of discharge cyclces
+                tMill,          // Actual time-stamp
+                writeInterval,  // Interval when writting data into file
+                3.3,            // Resistance for discharging
+                TCellMin,       // Minimum cell temperature
+                TCellMax        // Maximum cell temperature
+                //TSensors        // Object of the DallasTemperature class
+            );
+
+        Info<< " ++ Set the bit-wise address" << endl;;
+
+        // Set bit-wise the address of the temperature sensor
+        // I am not able to do it in the constructor via reference nor pointer
+        for (unsigned int i = 0; i < 8; ++i)
+        {
+            batteries[slot]->setTSensorAddress(i, TSensorAddresses[slot][i]);
+        }
+    }
 
     return 0;
 }
 
 /*
-// Define how many battery slots your project has
-// If you have more than two, you need to take care of MULTIPLEXER and correct
-// signal usage
-#define slots 1
 
-
-// The timeInterval describes approximate after how many seconds a new entry
-// is added into the measurement file. Low values give higher resolution but
-// also increase the data file size. If we charge/discharge commonly within
-// 1 to 3h, a interval > 30 is sufficient. This will not influence the analysis
-// of the average calculation
-#define WRITEINTERVAL 5
-
-
-// Set how many discharging cycles should be performed. For a more reliable
-// analysis, you can do more than one cycle
-#define NCYCLES 1
-
-
-// Temperature sensor input and battery temperature ranges
-
-    // Minimum cell temperature (dC)
-    float TMIN{5};
-
-    // Maximum cell temperature (dC)
-    float TMAX{28};
-
-    // On which digital input is the data bus of the DS18B20 connected
-    #define TBUS D2
-
-    // All DS18B20 sensor addresses related to the single slots
-    // We are working with addresses here to have full control
-    // You can simply get the sensor addresses by connecting one sensor to
-    // your Arduino board and use the DS18x20 example sketch. You will see the
-    // address of the sensor in this form:
-    // >>> "28 FF 64 2 C9 DF 3B 42"
-    // Simply add the 0x to the single values to get
-    // >>> "0x28 0xFF 0x66 0x2 0xC9 0xDF 0x3B 0x42"
-    const byte TSensorAddresses [slots][8] =
-        {
-            {0x28,0xFF,0x64,0x2,0xC9,0xDF,0x3B,0x42}    // Sensor-Address #1
-        };
-
-
-unsigned int nSampling = 20;
-float Rdiss = 5.41;
 
 
 // * * * * * * * * * * * * * * Initialization  * * * * * * * * * * * * * * * //
