@@ -26,21 +26,23 @@ SourceFiles
 #ifndef battery_h
 #define battery_h
 
-#include <Arduino.h>
-#include <Streaming.h>
-#include <DallasTemperature.h>
-#include "../writerReader/writerReader.h"
+//#include <Streaming.h>
+//#include <DallasTemperature.h>
+//#include "../writerReader/writerReader.h"
+#include "../definitions/definitions.hpp"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+namespace LIION
+{
 
 /*---------------------------------------------------------------------------*\
                            Class Battery Declaration
 \*---------------------------------------------------------------------------*/
 
 class Battery
-:
-    public WriterReader
+//:
+    //public WriterReader
 {
 public:
 
@@ -83,56 +85,56 @@ private:
     // Variables for capacity analysis
 
         // Resistance used (Ohm)
-        float R_;
+        scalar R_;
 
         // Actual voltage (V)
-        float U_;
+        scalar U_;
 
         // Actual current (mA)
-        float I_;
+        scalar I_;
 
         // Actual dissipated power (mW)
-        float P_;
+        scalar P_;
 
         // Total battery capacity (mAh)
-        float C_;
+        scalar C_;
 
         // Total battery energy (mWh)
-        float e_;
+        scalar e_;
 
         // Average capacity if more cycles are performed (mAh)
-        float CAve_;
+        scalar CAve_;
 
         // Average battery energy if more cycles are performed (mWh)
-        float eAve_;
+        scalar eAve_;
 
         // Container that stores the last n voltage data
         // DEPRECIATED: will be replaced by RShunt
-        float UBat_[2];
+        scalar UBat_[2];
 
 
     // Temperature sensor data
 
         // Actual temperature (dC)
-        float T_;
+        scalar T_;
 
         // Min-Temperature of cell (dC)
-        const float TMin_;
+        const scalar TMin_;
 
         // Max-Temperature of cell (dC)
-        const float TMax_;
+        const scalar TMax_;
 
         // Temperature sensor address (DS18B20)
-        byte TSensorAddress_[8];
+        uint8_t TSensorAddress_[8];
 
         // Reference to the sensors object
-        DallasTemperature& sensors_;
+        //DallasTemperature& sensors_;
 
 
     // Variables for IO operations
 
         // File name
-        String fileName_;
+        string fileName_;
 
         // Write interval (s)
         unsigned long writeInterval_;
@@ -150,10 +152,10 @@ public:
         const int,
         const unsigned long,
         const unsigned long,
-        const float,
-        const float,
-        const float,
-        DallasTemperature&
+        const scalar,
+        const scalar,
+        const scalar
+        //DallasTemperature&
     );
 
     // Destroctor
@@ -166,20 +168,20 @@ public:
         void setOffset(const unsigned long);
 
         // Set voltage (V)
-        void setU(const float);
+        void setU(const scalar);
 
         // Set actual (measured) voltage (V)
         void setU();
 
         // Set current (mA)
-        void setI(const float);
+        void setI(const scalar);
 
         // Set the mode
         void setMode(const mode m);
 
         // Set bitwise the address of the temperature sensor
         // I am too stupid to do it in the constructor -.-
-        void setTSensorAddress(const unsigned int, const byte);
+        void setTSensorAddress(const unsigned int, const uint8_t);
 
 
     // Public Return Functions
@@ -191,10 +193,10 @@ public:
         inline int slot() const { return slot_; };
 
         // Return the voltage (V)
-        inline float U() const { return U_; }
+        inline scalar U() const { return U_; }
 
         // Return the temperature (dC)
-        inline float T() const { return T_; }
+        inline scalar T() const { return T_; }
 
         // Return the number of discharges
         inline unsigned long nDischarges () const { return nDischarges_; }
@@ -264,24 +266,28 @@ private:
     // Private Member Functions
 
         // Read the digital signal at A0, convert it to a voltage and return it
-        float readU() const;
+        scalar readU() const;
 
         // Convert the digital to an analog value
         // This function provides a mapping from an digital value to an analog
         // value by using an linear interpolation approach
-        float DtoA
+        scalar DtoA
         (
             const unsigned int,
             const int,
             const int,
-            const float,
-            const float
+            const scalar,
+            const scalar
         ) const;
 
         // Read the actual temperature of the sensor at D2 and return the value
         // in [dC]
-        float readT() const;
+        scalar readT() const;
 };
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace LIION
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
