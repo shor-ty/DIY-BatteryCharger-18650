@@ -29,8 +29,8 @@ CLEAR=clear
 CLEAN_DIR=rm -rfv
 WORK_DIR=$(PWD)
 DIR_OBJ=gcc/obj
-DIR_LIB=../platforms/libs
-DIR_INCLUDE=gcc/lnInclude
+DIR_LIB=$(WORK_DIR)/../platforms/libs
+DIR_INCLUDE=$(WORK_DIR)/gcc/lnInclude
 
 
 #------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ clear:
 linkHeaders:
 	$(info Linking header files...)
 	$(foreach file, $(HEADER_SYM_LINK), $(info $(file) ))
-	$(foreach file, $(HEADER_SYM_LINK), $(shell $(LINK) $(WORK_DIR)/$(file) $(WORK_DIR)/$(DIR_INCLUDE)))
+	$(foreach file, $(HEADER_SYM_LINK), $(shell $(LINK) $(WORK_DIR)/$(file) $(DIR_INCLUDE)))
 	$(info Linking done...)
 	$(info )
 	$(info )
@@ -82,7 +82,7 @@ linkHeaders:
 #------------------------------------------------------------------------------
 liblithiumIon: $(OBJECT_FILES)
 	$(SPACE_MSG)
-	$(info Create litihiumIon library...)
+	$(info Create lithiumIon library...)
 	ar rvs $(DIR_LIB)/$(addsuffix .so, $(basename $@)) $(OBJECT_FILES)
 
 

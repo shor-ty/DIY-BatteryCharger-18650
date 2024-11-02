@@ -16,15 +16,25 @@
  COMPILER=g++
  SRC_PATH=src/gcc/lnInclude
  LIB_PATH=platforms/libs/
+ WORK_PATH=$(PWD)
 
 
 #------------------------------------------------------------------------------ 
 
-build : makeDir
-	$(COMPILER) $(CPPFLAGS) -I$(SRC_PATH) -L$(LIB_PATH) DIYCharger.cpp -o platforms/bin/$(PROGRAM)
-	#$(COMPILER) $(CPPFLAGS) -I$(SRC_PATH) -L$(LIB_PATH) DIYCharger.cpp -llitihiumIon -o $(PROGRAM)
+all: makeDir libs exec
+
+libs: 
+	$(MAKE) -C src/
+
+exec:
+	$(COMPILER) $(CPPFLAGS) -I$(SRC_PATH) -L$(LIB_PATH) LiIonCharger.cpp -llithiumIon -o $(WORK_PATH)/platforms/bin/$(PROGRAM)
 
 makeDir:
-	mkdir platforms/bin
+	mkdir -p platforms/bin platforms/libs
+
+clean: 
+	rm -rf platforms gcc
+	$(MAKE) -C src/ clean
+
 
 #------------------------------------------------------------------------------ 
